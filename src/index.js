@@ -1,9 +1,26 @@
 // require("dotenv").config({ path: "./.env" });
 import dotenv from "dotenv";
 import connectDB from "./DB/index.js";
+import cors from "cors";
+import cookieParser from "cookie-parser";
 dotenv.config({ path: "./.env" });
 //method 3
-connectDB();
+import express from "express";
+const app = express();
+connectDB()
+  .then(() => {
+    app.on("error", (err) => {
+      console.error("MongoDB connection error:", err);
+      throw err;
+    });
+    app.listen(process.env.PORT || 3000, () => {
+      console.log(`Server is running on port ${process.env.PORT}`);
+    });
+  })
+  .catch((err) => {
+    console.error("MongoDB connection Failed:", err);
+    process.exit(1);
+  });
 //method 1
 // function connectDB() {
 //   mongoose
