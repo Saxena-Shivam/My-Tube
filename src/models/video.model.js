@@ -1,8 +1,15 @@
 import mongoose, { Schema } from "mongoose";
-import { User } from "./user.modal.js";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 const videoSchema = new Schema(
   {
+    videoFile: {
+      type: String, //cloudinary url
+      required: true,
+    },
+    thumbnail: {
+      type: String, //cloudinary url
+      required: true,
+    },
     title: {
       type: String,
       required: true,
@@ -10,18 +17,9 @@ const videoSchema = new Schema(
     description: {
       type: String,
       required: true,
-      trim: true,
-    },
-    videoFile: {
-      type: String,
-      required: true,
-    },
-    thumbnailUrl: {
-      type: String,
-      required: true,
     },
     duration: {
-      type: String,
+      type: Number,
       required: true,
     },
     views: {
@@ -30,7 +28,7 @@ const videoSchema = new Schema(
     },
     isPublished: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     owner: {
       type: Schema.Types.ObjectId,
