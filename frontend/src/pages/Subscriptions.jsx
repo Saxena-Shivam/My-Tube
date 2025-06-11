@@ -1,41 +1,41 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { subscriptionsAPI } from "../services/api"
-import { useAuth } from "../contexts/AuthContext"
-import LoadingSpinner from "../components/UI/LoadingSpinner"
-import { Users, User } from "lucide-react"
-import { Link } from "react-router-dom"
-import toast from "react-hot-toast"
+import { useState, useEffect } from "react";
+import { subscriptionsAPI } from "../services/api";
+import { useAuth } from "../contexts/AuthContext";
+import LoadingSpinner from "../components/UI/LoadingSpinner";
+import { Users, User } from "lucide-react";
+import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 const Subscriptions = () => {
-  const { user } = useAuth()
-  const [subscriptions, setSubscriptions] = useState([])
-  const [loading, setLoading] = useState(true)
+  const { user } = useAuth();
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user?._id) {
-      fetchSubscriptions()
+      fetchSubscriptions();
     }
-  }, [user])
+  }, [user]);
 
   const fetchSubscriptions = async () => {
     try {
-      const response = await subscriptionsAPI.getSubscribedChannels(user._id)
-      setSubscriptions(response.data.data || [])
+      const response = await subscriptionsAPI.getSubscribedChannels();
+      setSubscriptions(response.data.data || []);
     } catch (error) {
-      toast.error("Failed to fetch subscriptions")
+      toast.error("Failed to fetch subscriptions");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-96">
         <LoadingSpinner size="lg" />
       </div>
-    )
+    );
   }
 
   return (
@@ -43,16 +43,24 @@ const Subscriptions = () => {
       <div className="mb-8">
         <div className="flex items-center space-x-3">
           <Users className="text-purple-500" size={32} />
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Subscriptions</h1>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+            Subscriptions
+          </h1>
         </div>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">Channels you're subscribed to ({subscriptions.length})</p>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
+          Channels you're subscribed to ({subscriptions.length})
+        </p>
       </div>
 
       {subscriptions.length === 0 ? (
         <div className="text-center py-12">
           <Users size={48} className="mx-auto text-gray-400 mb-4" />
-          <p className="text-gray-500 dark:text-gray-400">No subscriptions yet</p>
-          <p className="text-sm text-gray-400 mt-2">Subscribe to channels to see them here</p>
+          <p className="text-gray-500 dark:text-gray-400">
+            No subscriptions yet
+          </p>
+          <p className="text-sm text-gray-400 mt-2">
+            Subscribe to channels to see them here
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -74,16 +82,22 @@ const Subscriptions = () => {
                     <User size={32} className="text-gray-500" />
                   </div>
                 )}
-                <h3 className="font-semibold text-gray-900 dark:text-white">{channel.fullName}</h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">@{channel.username}</p>
-                <p className="text-xs text-gray-400 mt-2">{channel.subscribersCount || 0} subscribers</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white">
+                  {channel.fullName}
+                </h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+                  @{channel.username}
+                </p>
+                <p className="text-xs text-gray-400 mt-2">
+                  {channel.subscribersCount || 0} subscribers
+                </p>
               </div>
             </Link>
           ))}
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default Subscriptions
+export default Subscriptions;

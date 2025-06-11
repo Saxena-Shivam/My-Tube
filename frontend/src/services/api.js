@@ -124,8 +124,7 @@ export const tweetsAPI = {
 
 // Subscriptions API
 export const subscriptionsAPI = {
-  getSubscribedChannels: (channelId) =>
-    api.get(`/subscriptions/c/${channelId}`),
+  getSubscribedChannels: () => api.get(`/subscriptions/me`),
   toggleSubscription: (channelId) => api.post(`/subscriptions/c/${channelId}`),
   getSubscribers: (subscriberId) => api.get(`/subscriptions/u/${subscriberId}`),
 };
