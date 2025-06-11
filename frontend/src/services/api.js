@@ -92,6 +92,7 @@ export const videoAPI = {
       headers: { "Content-Type": "multipart/form-data" },
       onUploadProgress,
     }),
+  getTrendingVideos: () => api.get("/videos/trending"),
   getVideoById: (videoId) => api.get(`/videos/${videoId}`),
   updateVideo: (videoId, data) => api.patch(`/videos/${videoId}`, data),
   deleteVideo: (videoId) => api.delete(`/videos/${videoId}`),

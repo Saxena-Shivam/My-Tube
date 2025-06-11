@@ -1,78 +1,95 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { useParams, Link } from "react-router-dom"
-import { ThumbsUp, Share, Download, Eye, Calendar } from "lucide-react"
-import { videoAPI, likesAPI, subscriptionsAPI } from "../../services/api"
-import { useAuth } from "../../contexts/AuthContext"
-import LoadingSpinner from "../../components/UI/LoadingSpinner"
-import { formatViews, formatDistanceToNow } from "../../utils/formatUtils"
-import toast from "react-hot-toast"
+import { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { ThumbsUp, Share, Download, Eye, Calendar } from "lucide-react";
+import {
+  videoAPI,
+  likesAPI,
+  subscriptionsAPI,
+  authAPI,
+} from "../../services/api";
+import { useAuth } from "../../contexts/AuthContext";
+import LoadingSpinner from "../../components/UI/LoadingSpinner";
+import { formatViews, formatDistanceToNow } from "../../utils/formatUtils";
+import toast from "react-hot-toast";
 
 const VideoDetail = () => {
-  const { videoId } = useParams()
-  const { user, isAuthenticated } = useAuth()
-  const [video, setVideo] = useState(null)
-  const [loading, setLoading] = useState(true)
-  const [isLiked, setIsLiked] = useState(false)
-  const [isSubscribed, setIsSubscribed] = useState(false)
-  const [showDescription, setShowDescription] = useState(false)
+  const { videoId } = useParams();
+  const { user, isAuthenticated } = useAuth();
+  const [video, setVideo] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [isLiked, setIsLiked] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [showDescription, setShowDescription] = useState(false);
 
   useEffect(() => {
     if (videoId) {
-      fetchVideo()
+      fetchVideo();
+      addToWatchHistory(videoId);
     }
-  }, [videoId])
+    // eslint-disable-next-line
+  }, [videoId]);
 
   const fetchVideo = async () => {
     try {
-      const response = await videoAPI.getVideoById(videoId)
-      setVideo(response.data.data)
+      const response = await videoAPI.getVideoById(videoId);
+      setVideo(response.data.data);
     } catch (error) {
-      toast.error("Failed to load video")
+      toast.error("Failed to load video");
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
+
+  const addToWatchHistory = async (videoId) => {
+    try {
+      await authAPI.addToWatchHistory(videoId);
+    } catch (error) {
+      // Optionally handle error
+    }
+  };
 
   const handleLike = async () => {
     if (!isAuthenticated) {
-      toast.error("Please login to like videos")
-      return
+      toast.error("Please login to like videos");
+      return;
     }
 
     try {
-      await likesAPI.toggleVideoLike(videoId)
-      setIsLiked(!isLiked)
-      toast.success(isLiked ? "Removed from liked videos" : "Added to liked videos")
+      await likesAPI.toggleVideoLike(videoId);
+      setIsLiked(!isLiked);
+      toast.success(
+        isLiked ? "Removed from liked videos" : "Added to liked videos"
+      );
     } catch (error) {
-      toast.error("Failed to update like status")
+      toast.error("Failed to update like status");
     }
-  }
+  };
 
   const handleSubscribe = async () => {
     if (!isAuthenticated) {
-      toast.error("Please login to subscribe")
-      return
+      toast.error("Please login to subscribe");
+      return;
     }
 
-    if (!video?.owner?._id) return
+    if (!video?.owner?._id) return;
 
     try {
-      await subscriptionsAPI.toggleSubscription(video.owner._id)
-      setIsSubscribed(!isSubscribed)
-      toast.success(isSubscribed ? "Unsubscribed" : "Subscribed!")
+      await subscriptionsAPI.toggleSubscription(video.owner._id);
+      setIsSubscribed(!isSubscribed);
+      toast.success(isSubscribed ? "Unsubscribed" : "Subscribed!");
     } catch (error) {
-      toast.error("Failed to update subscription")
+      toast.error("Failed to update subscription");
     }
-  }
+  };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-96">
         <LoadingSpinner size="lg" />
       </div>
-    )
+    );
   }
 
   if (!video) {
@@ -80,7 +97,7 @@ const VideoDetail = () => {
       <div className="text-center py-12">
         <p className="text-gray-500 dark:text-gray-400">Video not found</p>
       </div>
-    )
+    );
   }
 
   return (
@@ -98,7 +115,9 @@ const VideoDetail = () => {
 
           {/* Video Info */}
           <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">{video.title}</h1>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+              {video.title}
+            </h1>
 
             <div className="flex items-center justify-between flex-wrap gap-4">
               <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400">
@@ -142,7 +161,10 @@ const VideoDetail = () => {
               <div className="flex items-center space-x-4">
                 <Link to={`/c/${video.owner?.username}`}>
                   <img
-                    src={video.owner?.avatar || "/placeholder.svg?height=48&width=48"}
+                    src={
+                      video.owner?.avatar ||
+                      "/placeholder.svg?height=48&width=48"
+                    }
                     alt={video.owner?.fullName}
                     className="w-12 h-12 rounded-full object-cover"
                   />
@@ -154,7 +176,9 @@ const VideoDetail = () => {
                   >
                     {video.owner?.fullName}
                   </Link>
-                  <p className="text-sm text-gray-500 dark:text-gray-400">@{video.owner?.username}</p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    @{video.owner?.username}
+                  </p>
                 </div>
               </div>
 
@@ -175,7 +199,11 @@ const VideoDetail = () => {
             {/* Description */}
             {video.description && (
               <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-                <div className={`text-gray-700 dark:text-gray-300 ${!showDescription ? "line-clamp-3" : ""}`}>
+                <div
+                  className={`text-gray-700 dark:text-gray-300 ${
+                    !showDescription ? "line-clamp-3" : ""
+                  }`}
+                >
                   {video.description}
                 </div>
                 {video.description.length > 200 && (
@@ -193,13 +221,17 @@ const VideoDetail = () => {
 
         {/* Sidebar - Related Videos */}
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Related Videos</h3>
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Related Videos
+          </h3>
           {/* Add related videos component here */}
-          <div className="text-center py-8 text-gray-500 dark:text-gray-400">Related videos coming soon...</div>
+          <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+            Related videos coming soon...
+          </div>
         </div>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default VideoDetail
+export default VideoDetail;

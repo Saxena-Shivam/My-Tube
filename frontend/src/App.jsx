@@ -15,7 +15,8 @@ import LikedVideos from "./pages/LikedVideos";
 import WatchHistory from "./pages/WatchHistory";
 import Subscriptions from "./pages/Subscriptions";
 import ProtectedRoute from "./components/Auth/ProtectedRoute";
-
+import Trending from "./pages/Trending";
+import Settings from "./pages/Settings.jsx";
 function App() {
   return (
     <ThemeProvider>
@@ -31,7 +32,8 @@ function App() {
               <Route index element={<Home />} />
               <Route path="video/:videoId" element={<VideoDetail />} />
               <Route path="c/:username" element={<Channel />} />
-
+              <Route path="/trending" element={<Trending />} />
+              <Route path="/settings" element={<Settings />} />
               {/* Protected Routes */}
               <Route
                 path="upload"
