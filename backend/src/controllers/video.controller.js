@@ -79,15 +79,18 @@ const publishAVideo = asyncHandler(async (req, res) => {
     .json(new ApiResponse(201, video, "Video published successfully"));
 });
 
-// Get a video by ID
+// Get a video by ID and increment views
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
   if (!isValidObjectId(videoId)) throw new ApiError(400, "Invalid video ID");
 
-  const video = await Video.findById(videoId).populate(
-    "owner",
-    "username avatar"
-  );
+  // Increment views and return the updated video
+  const video = await Video.findByIdAndUpdate(
+    videoId,
+    { $inc: { views: 1 } },
+    { new: true }
+  ).populate("owner", "username avatar");
+
   if (!video) throw new ApiError(404, "Video not found");
 
   res.json(new ApiResponse(200, video, "Video fetched successfully"));
@@ -143,7 +146,15 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
 
   res.json(new ApiResponse(200, video, "Video publish status toggled"));
 });
+const getVideosByUsername = asyncHandler(async (req, res) => {
+  const { username } = req.params;
+  const user = await User.findOne({ username });
+  if (!user)
+    return res.status(404).json(new ApiResponse(404, [], "User not found"));
 
+  const videos = await Video.find({ owner: user._id, isPublished: true });
+  res.json(new ApiResponse(200, videos, "Videos fetched successfully"));
+});
 export {
   getAllVideos,
   publishAVideo,
@@ -151,4 +162,5 @@ export {
   updateVideo,
   deleteVideo,
   togglePublishStatus,
+  getVideosByUsername,
 };

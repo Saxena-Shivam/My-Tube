@@ -21,7 +21,8 @@ export const ThemeProvider = ({ children }) => {
   });
 
   useEffect(() => {
-    const root = window.document.documentElement;
+    // Use <body> for Tailwind CDN dark mode support
+    const root = window.document.body;
     if (isDark) {
       root.classList.add("dark");
     } else {
@@ -30,9 +31,7 @@ export const ThemeProvider = ({ children }) => {
     localStorage.setItem("theme", isDark ? "dark" : "light");
   }, [isDark]);
 
-  const toggleTheme = () => {
-    setIsDark(!isDark);
-  };
+  const toggleTheme = () => setIsDark((prev) => !prev);
 
   return (
     <ThemeContext.Provider value={{ isDark, toggleTheme }}>

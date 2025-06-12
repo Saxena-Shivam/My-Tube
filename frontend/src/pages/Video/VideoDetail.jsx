@@ -8,6 +8,7 @@ import {
   likesAPI,
   subscriptionsAPI,
   authAPI,
+  commentsAPI,
 } from "../../services/api";
 import { useAuth } from "../../contexts/AuthContext";
 import LoadingSpinner from "../../components/UI/LoadingSpinner";
@@ -22,11 +23,15 @@ const VideoDetail = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [isSubscribed, setIsSubscribed] = useState(false);
   const [showDescription, setShowDescription] = useState(false);
+  const [comments, setComments] = useState([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentLoading, setCommentLoading] = useState(false);
 
   useEffect(() => {
     if (videoId) {
       fetchVideo();
       addToWatchHistory(videoId);
+      fetchComments();
     }
     // eslint-disable-next-line
   }, [videoId]);
@@ -35,6 +40,20 @@ const VideoDetail = () => {
     try {
       const response = await videoAPI.getVideoById(videoId);
       setVideo(response.data.data);
+
+      // Check if user has liked the video
+      if (response.data.data.likedBy?.includes(user?._id)) {
+        setIsLiked(true);
+      } else {
+        setIsLiked(false);
+      }
+
+      // Check if user is subscribed to the channel
+      if (response.data.data.owner?.subscribers?.includes(user?._id)) {
+        setIsSubscribed(true);
+      } else {
+        setIsSubscribed(false);
+      }
     } catch (error) {
       toast.error("Failed to load video");
     } finally {
@@ -50,6 +69,38 @@ const VideoDetail = () => {
     }
   };
 
+  const fetchComments = async () => {
+    try {
+      const res = await commentsAPI.getComments(videoId);
+      // Use res.data.data.comments to get the array
+      setComments(
+        Array.isArray(res.data.data.comments) ? res.data.data.comments : []
+      );
+    } catch {
+      setComments([]);
+    }
+  };
+
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) {
+      toast.error("Please login to comment");
+      return;
+    }
+    if (!commentText.trim()) return;
+    setCommentLoading(true);
+    try {
+      await commentsAPI.addComment(videoId, commentText);
+      setCommentText("");
+      fetchComments();
+      toast.success("Comment added!");
+    } catch {
+      toast.error("Failed to add comment");
+    } finally {
+      setCommentLoading(false);
+    }
+  };
+
   const handleLike = async () => {
     if (!isAuthenticated) {
       toast.error("Please login to like videos");
@@ -58,7 +109,7 @@ const VideoDetail = () => {
 
     try {
       await likesAPI.toggleVideoLike(videoId);
-      setIsLiked(!isLiked);
+      setIsLiked((prev) => !prev);
       toast.success(
         isLiked ? "Removed from liked videos" : "Added to liked videos"
       );
@@ -77,7 +128,7 @@ const VideoDetail = () => {
 
     try {
       await subscriptionsAPI.toggleSubscription(video.owner._id);
-      setIsSubscribed(!isSubscribed);
+      setIsSubscribed((prev) => !prev);
       toast.success(isSubscribed ? "Unsubscribed" : "Subscribed!");
     } catch (error) {
       toast.error("Failed to update subscription");
@@ -141,7 +192,7 @@ const VideoDetail = () => {
                   }`}
                 >
                   <ThumbsUp size={16} />
-                  <span>Like</span>
+                  <span>{isLiked ? "Unlike" : "Like"}</span>
                 </button>
 
                 <button className="flex items-center space-x-2 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
@@ -191,7 +242,7 @@ const VideoDetail = () => {
                       : "bg-red-600 text-white hover:bg-red-700"
                   }`}
                 >
-                  {isSubscribed ? "Subscribed" : "Subscribe"}
+                  {isSubscribed ? "Unsubscribe" : "Subscribe"}
                 </button>
               )}
             </div>
@@ -216,6 +267,64 @@ const VideoDetail = () => {
                 )}
               </div>
             )}
+
+            {/* Comments Section */}
+            <div className="bg-white dark:bg-gray-900 rounded-lg p-4 mt-6">
+              <h3 className="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                Comments
+              </h3>
+              <form
+                onSubmit={handleCommentSubmit}
+                className="flex mb-4 space-x-2"
+              >
+                <input
+                  type="text"
+                  className="flex-1 px-3 py-2 rounded border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-white"
+                  placeholder="Add a comment..."
+                  value={commentText}
+                  onChange={(e) => setCommentText(e.target.value)}
+                  disabled={commentLoading}
+                />
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-primary-600 text-white rounded hover:bg-primary-700 disabled:opacity-50"
+                  disabled={commentLoading}
+                >
+                  {commentLoading ? "Posting..." : "Post"}
+                </button>
+              </form>
+              <div>
+                {comments.length === 0 ? (
+                  <p className="text-gray-500 dark:text-gray-400">
+                    No comments yet.
+                  </p>
+                ) : (
+                  comments.map((comment) => (
+                    <div key={comment._id} className="mb-3">
+                      <div className="flex items-center space-x-2">
+                        <img
+                          src={
+                            comment.owner?.avatar ||
+                            "/placeholder.svg?height=32&width=32"
+                          }
+                          alt={comment.owner?.username}
+                          className="w-8 h-8 rounded-full object-cover"
+                        />
+                        <span className="font-medium text-gray-900 dark:text-white">
+                          {comment.owner?.username}
+                        </span>
+                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                          {formatDistanceToNow(new Date(comment.createdAt))} ago
+                        </span>
+                      </div>
+                      <p className="ml-10 text-gray-800 dark:text-gray-200">
+                        {comment.content}
+                      </p>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

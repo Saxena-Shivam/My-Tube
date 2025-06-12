@@ -80,7 +80,8 @@ export const authAPI = {
       headers: { "Content-Type": "multipart/form-data" },
     }),
   getChannelByUsername: (username) => api.get(`/users/c/${username}`),
-  getWatchHistory: () => api.get("/users/history"),
+  getWatchHistory: () => api.get("/history"),
+  addToWatchHistory: (videoId) => api.post("/history", { videoId }),
 };
 
 // Video API
@@ -98,6 +99,7 @@ export const videoAPI = {
   deleteVideo: (videoId) => api.delete(`/videos/${videoId}`),
   togglePublishStatus: (videoId) =>
     api.patch(`/videos/toggle/publish/${videoId}`),
+  getVideosByUsername: (username) => api.get(`/videos/user/${username}`),
 };
 
 // Dashboard API
@@ -142,6 +144,16 @@ export const playlistsAPI = {
   removeVideoFromPlaylist: (videoId, playlistId) =>
     api.patch(`/playlists/remove/${videoId}/${playlistId}`),
   getUserPlaylists: (userId) => api.get(`/playlists/user/${userId}`),
+};
+
+// Comments API
+export const commentsAPI = {
+  getComments: (videoId) => api.get(`/comments/${videoId}`),
+  addComment: (videoId, content) =>
+    api.post(`/comments/${videoId}`, { content }),
+  deleteComment: (commentId) => api.delete(`/comments/c/${commentId}`),
+  updateComment: (commentId, content) =>
+    api.patch(`/comments/c/${commentId}`, { content }),
 };
 
 // Health check

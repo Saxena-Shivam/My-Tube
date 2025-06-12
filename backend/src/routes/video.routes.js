@@ -6,16 +6,17 @@ import {
   publishAVideo,
   togglePublishStatus,
   updateVideo,
+  getVideosByUsername, // <-- Import the new controller
 } from "../controllers/video.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { upload } from "../middlewares/multer.middleware.js";
-import { Video } from "../models/video.model.js"; // <-- Add this import
+import { Video } from "../models/video.model.js";
 
 const router = Router();
 
 // PUBLIC ROUTES
 
-// --- ADD THIS BLOCK: Trending Route ---
+// Trending Route
 router.get("/trending", async (req, res) => {
   try {
     const twoMonthsAgo = new Date();
@@ -33,7 +34,9 @@ router.get("/trending", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch trending videos" });
   }
 });
-// --- END BLOCK ---
+
+// Get videos by channel username
+router.get("/user/:username", getVideosByUsername);
 
 router.route("/").get(getAllVideos);
 router.route("/:videoId").get(getVideoById);

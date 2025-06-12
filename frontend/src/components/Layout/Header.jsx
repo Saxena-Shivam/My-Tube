@@ -1,30 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Link, useNavigate } from "react-router-dom"
-import { Search, Upload, Bell, User, LogOut, Settings, Moon, Sun } from "lucide-react"
-import { useAuth } from "../../contexts/AuthContext"
-import { useTheme } from "../../contexts/ThemeContext"
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  Search,
+  Upload,
+  Bell,
+  User,
+  LogOut,
+  Settings,
+  Moon,
+  Sun,
+} from "lucide-react";
+import { useAuth } from "../../contexts/AuthContext";
+import { useTheme } from "../../contexts/ThemeContext";
 
 const Header = () => {
-  const { user, isAuthenticated, logout } = useAuth()
-  const { isDark, toggleTheme } = useTheme()
-  const navigate = useNavigate()
-  const [searchQuery, setSearchQuery] = useState("")
-  const [showUserMenu, setShowUserMenu] = useState(false)
+  const { user, isAuthenticated, logout } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
+  const navigate = useNavigate();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [showUserMenu, setShowUserMenu] = useState(false);
 
   const handleSearch = (e) => {
-    e.preventDefault()
+    e.preventDefault();
     if (searchQuery.trim()) {
       // Implement search functionality
-      console.log("Searching for:", searchQuery)
+      console.log("Searching for:", searchQuery);
     }
-  }
+  };
 
   const handleLogout = async () => {
-    await logout()
-    navigate("/")
-  }
+    await logout();
+    navigate("/");
+  };
 
   return (
     <header className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3">
@@ -34,7 +43,9 @@ const Header = () => {
           <div className="w-8 h-8 bg-red-600 rounded flex items-center justify-center">
             <span className="text-white font-bold text-sm">YT</span>
           </div>
-          <span className="text-xl font-bold text-gray-900 dark:text-white">VideoTube</span>
+          <span className="text-xl font-bold text-gray-900 dark:text-white">
+            VideoTube
+          </span>
         </Link>
 
         {/* Search Bar */}
@@ -62,6 +73,7 @@ const Header = () => {
           <button
             onClick={toggleTheme}
             className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700"
+            aria-label="Toggle theme"
           >
             {isDark ? <Sun size={20} /> : <Moon size={20} />}
           </button>
@@ -132,7 +144,10 @@ const Header = () => {
             </>
           ) : (
             <div className="flex items-center space-x-2">
-              <Link to="/login" className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium">
+              <Link
+                to="/login"
+                className="px-4 py-2 text-primary-600 hover:text-primary-700 font-medium"
+              >
                 Login
               </Link>
               <Link to="/register" className="btn-primary">
@@ -143,7 +158,7 @@ const Header = () => {
         </div>
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header;
